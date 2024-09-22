@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EYEBOX</title>
+    <style>
+        
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            flex-wrap: nowrap;
+        }
+    
+        .search-container {
+            display: flex;
+            align-items: center;
+            max-width: 40%;
+            min-width: 150px;
+            
+        }
+    
+        #search-input {
+            padding: 8px;
+            font-size: 16px;
+            border: 2px solid #000000;
+            border-radius: 4px 0 0 4px;
+            background-color: rgba(90, 89, 89, 0.329);
+            color: white;
+            width: 100%;
+            min-width: 80px;
+        }
+    
+        #search-button {
+            padding: 8px 15px;
+            font-size: 16px;
+            background-color: #ff0000;
+            color: rgb(255, 255, 255);
+            border: 1px solid #1b1b1b;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            white-space: nowrap;
+            size: 1px;
+        }
+    
+    
+        #search-button:hover {
+            background-color: #660000;
+        }
+    
+        @media (max-width: 768px) {
+            .search-container {
+                max-width: 30%;
+            }
+    
+            #search-input {
+                font-size: 14px;
+                padding: 6px;
+            }
+    
+            #search-button {
+                font-size: 14px;
+                padding: 6px 10px;
+            }
+        }
+    
+        @media (max-width: 480px) {
+            .search-container {
+                max-width: 25%;
+            }
+    
+            #search-input {
+                font-size: 12px;
+                padding: 4px;
+            }
+    
+            #search-button {
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+        }
+    </style>
+    
+    
+    <link rel="stylesheet" href="mobile2style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Bungee&family=Libre+Baskerville:wght@700&family=Orbitron:wght@500&family=Roboto:wght@100;300;400;500;700;900&family=Sen:wght@400;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="header">
+        <div class="menu-toggle" id="sidebarToggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <h1 id="headerTitle">EYEBOX</h1>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search...">
+            <button id="search-button">Search</button>
+        </div>
+        
+        
+    </div>
+    <nav class="sidebar">
+        <ul>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="mobilemovies.html" class="active">Movies</a></li>
+            <li><a href="mobileseries.html">Series</a></li>
+            <li><a href="#anime">Anime</a></li>
+            <li><a href="mobile2.html">Actors</a></li>
+            <li><a href="#" id="theme-switcher">Theme</a></li>
+            <li><a href="#support">Support</a></li>
+        </ul>
+    </nav>
+    <div class="main-content">
+        <div id="featured-section" class="featured-section"></div>
+        <main id="content-container" class="content-grid">
+            <!-- Movie content will be dynamically inserted here -->
+        </main>
+        <div class="pagination">
+            <button id="prev-page">Previous</button>
+            <span id="page-number">1</span>
+            <button id="next-page">Next</button>
+        </div>
+    </div>
+ <script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const contentContainer = document.getElementById('content-container');
+    const featuredSection = document.getElementById('featured-section');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.sidebar');
+    const header = document.querySelector('.header');
+    const pageNumber = document.getElementById('page-number');
+    const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('search-button');
+    let currentPage = 1;
+    let lastScrollTop = 0;
+    let featuredMovies = [];
+    let currentFeaturedIndex = 0;
+
+    sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+        document.body.classList.toggle('blur');
+        document.querySelector('.main-content').classList.toggle('shift');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+            sidebar.classList.remove('active');
+            document.body.classList.remove('blur');
+            document.querySelector('.main-content').classList.remove('shift');
+        }
+    });
+
+    window.addEventListener('scroll', () => {
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        if (scrollTop > lastScrollTop) {
+            header.classList.remove('scroll-up');
+            header.classList.add('scroll-down');
+        } else {
+            header.classList.remove('scroll-down');
+            header.classList.add('scroll-up');
+        }
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    }, false);
+
+    function fetchMovies(page) {
+        fetch(`https://api.themoviedb.org/3/movie/top_rated?api_key=ea2f128742fd0a3bb3ae2e2baa64ed9e&page=${page}`)
+            .then(response => response.json())
+            .then(data => {
+                displayMovies(data.results);
+                if (page === 1) {
+                    createFeaturedSection(data.results.slice(0, 5));
+                    featuredSection.style.display = 'block';
+                }
+            })
+            .catch(err => console.error('Error fetching movies:', err));
+    }
+
+    function createFeaturedSection(movies) {
+        featuredMovies = movies;
+        featuredSection.innerHTML = '';
+        movies.forEach((movie, index) => {
+            const featuredMovie = document.createElement('div');
+            featuredMovie.classList.add('featured-item');
+            if (index === 0) featuredMovie.classList.add('active');
+            featuredMovie.style.backgroundImage = `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`;
+            featuredMovie.innerHTML = `
+                <div class="item-info">
+                    <h2>${movie.title}</h2>
+                    <p class="desktop-only">${movie.overview}</p>
+                    <div class="button-container">
+                        <button class="play-btn" data-id="${movie.id}">Play</button>
+                        <button class="more-info-btn" data-id="${movie.id}">More Info</button>
+                    </div>
+                </div>
+            `;
+            featuredSection.appendChild(featuredMovie);
+        });
+        rotateFeaturedMovies();
+    }
+
+    function rotateFeaturedMovies() {
+        setInterval(() => {
+            const featuredMovies = document.querySelectorAll('.featured-item');
+            featuredMovies[currentFeaturedIndex].classList.remove('active');
+            currentFeaturedIndex = (currentFeaturedIndex + 1) % featuredMovies.length;
+            featuredMovies[currentFeaturedIndex].classList.add('active');
+        }, 6000);
+    }
+
+    function displayMovies(movies) {
+        contentContainer.innerHTML = '';
+        movies.forEach(movie => {
+            const movieCard = document.createElement('div');
+            movieCard.classList.add('content-card');
+            movieCard.innerHTML = `
+                <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" loading="lazy">
+                <div class="card-content">
+                    <h2>${movie.title}</h2>
+                    <p>★ ${movie.vote_average.toFixed(1)}</p>
+                    <p>${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'}</p>
+                </div>
+            `;
+            contentContainer.appendChild(movieCard);
+            movieCard.addEventListener('click', () => showMovieDetails(movie.id));
+        });
+    }
+
+    function showMovieDetails(movieId) {
+        fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=ea2f128742fd0a3bb3ae2e2baa64ed9e&append_to_response=credits,recommendations`)
+            .then(response => response.json())
+            .then(movie => {
+                const modal = document.createElement('div');
+                modal.classList.add('modal');
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <h2>${movie.title}</h2>
+                        <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
+                        <p><strong>Rating:</strong> ${movie.vote_average}</p>
+                        <p><strong>Release Date:</strong> ${movie.release_date}</p>
+                        <p><strong>Overview:</strong> ${movie.overview}</p>
+                        <button class="play-btn" data-id="${movie.id}">Play Movie</button>
+                        <h3>Cast</h3>
+                        <div class="cast-list">
+                            ${movie.credits.cast.slice(0, 5).map(actor => `
+                                <div class="cast-item">
+                                    <img src="https://image.tmdb.org/t/p/w200${actor.profile_path}" alt="${actor.name}">
+                                    <p>${actor.name}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <h3>Recommendations</h3>
+                        <div class="recommendations-list">
+                            ${movie.recommendations.results.slice(0, 5).map(rec => `
+                                <div class="recommendation-item" data-id="${rec.id}">
+                                    <img src="https://image.tmdb.org/t/p/w200${rec.poster_path}" alt="${rec.title}">
+                                    <p>${rec.title}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                modal.style.display = 'block';
+
+                const closeBtn = modal.querySelector('.close');
+                closeBtn.onclick = () => modal.remove();
+
+                window.onclick = (event) => {
+                    if (event.target === modal) {
+                        modal.remove();
+                    }
+                };
+
+                const playBtn = modal.querySelector('.play-btn');
+                playBtn.addEventListener('click', () => {
+                    modal.remove();
+                    playVideo(movie.id, true);
+                });
+
+                const recommendationItems = modal.querySelectorAll('.recommendation-item');
+                recommendationItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        modal.remove();
+                        showMovieDetails(item.dataset.id);
+                    });
+                });
+            })
+            .catch(err => console.error('Error fetching movie details:', err));
+    }
+
+    featuredSection.addEventListener('click', (e) => {
+        if (e.target.classList.contains('play-btn')) {
+            const id = e.target.dataset.id;
+            playVideo(id, true);
+        } else if (e.target.classList.contains('more-info-btn')) {
+            const id = e.target.dataset.id;
+            showMovieDetails(id);
+        }
+    });
+
+    function playVideo(id, isMovie) {
+        const videoUrl = isMovie 
+            ? `https://vidsrc.cc/v3/embed/movie/${id}`
+            : `https://vidsrc.cc/v3/embed/tv/${id}`;
+        
+        const modal = document.createElement('div');
+        modal.classList.add('modal');
+        modal.innerHTML = `
+            <div class="modal-content video-content">
+                <span class="close">&times;</span>
+                <iframe src="${videoUrl}" frameborder="0" allowfullscreen></iframe>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+
+        const closeBtn = modal.querySelector('.close');
+        closeBtn.onclick = () => modal.remove();
+
+        window.onclick = (event) => {
+            if (event.target === modal) {
+                modal.remove();
+            }
+        };
+    }
+
+    document.getElementById('prev-page').addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            fetchMovies(currentPage);
+            pageNumber.textContent = currentPage;
+        }
+    });
+
+    document.getElementById('next-page').addEventListener('click', () => {
+        currentPage++;
+        fetchMovies(currentPage);
+        pageNumber.textContent = currentPage;
+    });
+
+    // New search function
+    function searchMovies() {
+        const query = searchInput.value.trim();
+        if (query) {
+            fetch(`https://api.themoviedb.org/3/search/movie?api_key=ea2f128742fd0a3bb3ae2e2baa64ed9e&query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    displayMovies(data.results);
+                    featuredSection.style.display = 'none';
+                })
+                .catch(err => console.error('Error searching movies:', err));
+        } else {
+            fetchMovies(currentPage);
+            featuredSection.style.display = 'block';
+        }
+    }
+
+    // Add event listeners for search
+    searchButton.addEventListener('click', searchMovies);
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            searchMovies();
+        }
+    });
+
+    fetchMovies(currentPage);
+});
+    </script>       
+</body>
+</html>

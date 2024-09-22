@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EYEBOX</title>
+    <link rel="stylesheet" href="mobile2style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Bungee&family=Libre+Baskerville:wght@700&family=Orbitron:wght@500&family=Roboto:wght@100;300;400;500;700;900&family=Sen:wght@400;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="header">
+        <div class="menu-toggle" id="sidebarToggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <h1 id="headerTitle">EYEBOX</h1>
+    </div>
+    <div class="subheader">
+        <h2 class="popular-actors-heading">Popular Actors</h2>
+    </div>
+    <nav class="sidebar">
+        <ul>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="mobilemovies.html">Movies</a></li>
+            <li><a href="mobileseries.html">Series</a></li>
+            <li><a href="#anime">Anime</a></li>
+            <li><a href="#" id="actorsLink">Actors</a></li>
+            <li><a href="#" id="theme-switcher">Theme</a></li>
+            <li><a href="#support">Support</a></li>
+        </ul>
+    </nav>
+    <div class="main-content2">
+        <main id="show-container">
+            <!-- Actors will be dynamically inserted here -->
+        </main>
+        <div class="pagination">
+            <button id="prev-page">Previous</button>
+            <span id="page-number">1</span>
+            <button id="next-page">Next</button>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            const showContainer = document.getElementById('show-container');
+            const header = document.querySelector('.header');
+            const pageNumber = document.getElementById('page-number');
+            let currentPage = 1;
+            let lastScrollTop = 0;
+
+            console.log('DOM fully loaded and parsed');
+
+            // Toggle sidebar
+            sidebarToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                mainContent.classList.toggle('shift');
+                document.body.classList.toggle('blur');
+            });
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!sidebar.contains(e.target) && 
+                    !sidebarToggle.contains(e.target) && 
+                    sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                    mainContent.classList.remove('shift');
+                    document.body.classList.remove('blur');
+                }
+            });
+
+            // Header scroll behavior
+            window.addEventListener('scroll', () => {
+                let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                if (scrollTop > lastScrollTop) {
+                    header.classList.remove('scroll-up');
+                    header.classList.add('scroll-down');
+                } else {
+                    header.classList.remove('scroll-down');
+                    header.classList.add('scroll-up');
+                }
+                lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+            }, false);
+
+            const options = {
+                method: 'GET',
+                headers: {
+                    accept: 'application/json',
+                    Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJlYTJmMTI4NzQyZmQwYTNiYjNhZTJlMmJhYTY0ZWQ5ZSIsIm5iZiI6MTcyNTc3MjAxOC4yODgxMzYsInN1YiI6IjY2YmYwZGEyYTU1YjA1ZjVkZDYxMTI5YiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.SN8TMHj0yiS5GY7nCAL4pr60TUDI90WAJwb6aP--f_0'
+                }
+            };
+
+            function fetchActors(page) {
+                showContainer.innerHTML = '<p>Loading...</p>'; 
+                fetch(`https://api.themoviedb.org/3/person/popular?language=en-US&page=${page}`, options)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        displayActors(data);
+                    })
+                    .catch(err => {
+                        console.error('Error fetching actors:', err);
+                        showContainer.innerHTML = '<p>Error loading actors. Please try again later.</p>';
+                    });
+            }
+
+            function displayActors(data) {
+                showContainer.innerHTML = ''; 
+                if (data.results && data.results.length > 0) {
+                    data.results.forEach(actor => {
+                        const showCard = document.createElement('div');
+                        showCard.classList.add('show-card');
+
+                        const showImage = document.createElement('img');
+                        showImage.src = actor.profile_path 
+                            ? `https://image.tmdb.org/t/p/w500${actor.profile_path}`
+                            : 'path/to/placeholder-image.jpg'; // Add a placeholder image path
+                        showImage.alt = actor.name;
+                        showImage.loading = 'lazy';
+
+                        const showCardContent = document.createElement('div');
+                        showCardContent.classList.add('show-card-content');
+
+                        const showTitle = document.createElement('h2');
+                        showTitle.textContent = actor.name;
+
+                        const showOverview = document.createElement('p');
+                        showOverview.textContent = `Popularity: ${actor.popularity.toFixed(1)}`;
+
+                        showCardContent.appendChild(showTitle);
+                        showCardContent.appendChild(showOverview);
+                        showCard.appendChild(showImage);
+                        showCard.appendChild(showCardContent);
+                        showContainer.appendChild(showCard);
+
+                        // Add click event listener to each actor card
+                        showCard.addEventListener('click', () => fetchActorDetails(actor.id));
+                    });
+                } else {
+                    showContainer.innerHTML = '<p>No actors found.</p>';
+                }
+            }
+
+            function fetchActorDetails(actorId) {
+                console.log(`Fetching details for actor ID: ${actorId}`);
+                fetch(`https://api.themoviedb.org/3/person/${actorId}?api_key=ea2f128742fd0a3bb3ae2e2baa64ed9e`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        displayActorDetails(data);
+                    })
+                    .catch(err => {
+                        console.error('Error fetching actor details:', err);
+                        alert('Error loading actor details. Please try again later.');
+                    });
+            }
+
+            function displayActorDetails(actor) {
+                const modal = document.createElement('div');
+                modal.classList.add('modal');
+
+                const modalContent = document.createElement('div');
+                modalContent.classList.add('modal-content');
+
+                const closeBtn = document.createElement('span');
+                closeBtn.classList.add('close');
+                closeBtn.innerHTML = '&times;';
+                closeBtn.onclick = () => modal.remove();
+
+                const title = document.createElement('h2');
+                title.textContent = actor.name;
+
+                const image = document.createElement('img');
+                image.src = actor.profile_path 
+                    ? `https://image.tmdb.org/t/p/w500${actor.profile_path}`
+                    : 'path/to/placeholder-image.jpg'; // Add a placeholder image path
+                image.alt = actor.name;
+
+                const birthday = document.createElement('p');
+                birthday.textContent = `Birthday: ${actor.birthday || 'N/A'}`;
+
+                const placeOfBirth = document.createElement('p');
+                placeOfBirth.textContent = `Place of Birth: ${actor.place_of_birth || 'N/A'}`;
+
+                const biography = document.createElement('p');
+                biography.textContent = `Biography: ${actor.biography || 'No biography available.'}`;
+
+                modalContent.appendChild(closeBtn);
+                modalContent.appendChild(title);
+                modalContent.appendChild(image);
+                modalContent.appendChild(birthday);
+                modalContent.appendChild(placeOfBirth);
+                modalContent.appendChild(biography);
+                modal.appendChild(modalContent);
+
+                document.body.appendChild(modal);
+                modal.style.display = 'block';
+
+                // Close modal when clicking outside the content
+                modal.onclick = (event) => {
+                    if (event.target === modal) {
+                        modal.remove();
+                    }
+                };
+            }
+
+            document.getElementById('prev-page').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updatePage();
+                }
+            });
+
+            document.getElementById('next-page').addEventListener('click', () => {
+                currentPage++;
+                updatePage();
+            });
+
+            function updatePage() {
+                console.log(`Updating to page ${currentPage}`);
+                fetchActors(currentPage);
+                pageNumber.textContent = currentPage;
+            }
+
+            // Initial fetch
+            
+            fetchActors(currentPage);
+
+        });
+    </script>
+</body>
+</html>
