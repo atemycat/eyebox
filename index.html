@@ -125,6 +125,7 @@
     </div>
     
     <script>
+
         document.addEventListener('DOMContentLoaded', () => {
             const contentContainer = document.getElementById('content-container');
             const sidebarToggle = document.getElementById('sidebarToggle');
@@ -134,6 +135,30 @@
             const searchInput = document.getElementById('search-input');
             const searchButton = document.getElementById('search-button');
             const pageNumber = document.getElementById('page-number');
+            const TMDB_API_KEY = 'ea2f128742fd0a3bb3ae2e2baa64ed9e';
+            const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+            const PROXY_BASE_URL = 'https://proxy.candy0015man.workers.dev'; // Replace with your actual proxy server URL
+
+// Function to fetch data with fallback
+async function fetchWithFallback(endpoint, params = {}) {
+    const queryParams = new URLSearchParams({ ...params, api_key: TMDB_API_KEY }).toString();
+    const urls = [
+        `${TMDB_BASE_URL}${endpoint}?${queryParams}`,
+        `${PROXY_BASE_URL}${endpoint}?${queryParams}`
+    ];
+
+    for (const url of urls) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Network response was not ok');
+            return await response.json();
+        } catch (error) {
+            console.warn(`Failed to fetch from ${url}:`, error);
+        }
+    }
+
+    throw new Error('All fetch attempts failed');
+}
             let currentPage = 1;
             let lastScrollTop = 0;
             let featuredMovies = [];
@@ -170,37 +195,34 @@
             }, false);
     
             function fetchPopularMovies(page) {
-                return fetch(`https://api.themoviedb.org/3/movie/popular?api_key=ea2f128742fd0a3bb3ae2e2baa64ed9e&page=${page}`)
-                    .then(response => response.json())
-                    .then(data => data.results)
-                    .catch(err => {
-                        console.error('Error fetching movies:', err);
-                        return [];
-                    });
-            }
+    return fetchWithFallback('/movie/popular', { page })
+        .then(data => data.results)
+        .catch(err => {
+            console.error('Error fetching movies:', err);
+            return [];
+        });
+}
     
-            function fetchPopularTVShows(page) {
-                return fetch(`https://api.themoviedb.org/3/tv/popular?api_key=ea2f128742fd0a3bb3ae2e2baa64ed9e&page=${page}`)
-                    .then(response => response.json())
-                    .then(data => data.results)
-                    .catch(err => {
-                        console.error('Error fetching TV shows:', err);
-                        return [];
-                    });
-            }
+function fetchPopularTVShows(page) {
+    return fetchWithFallback('/tv/popular', { page })
+        .then(data => data.results)
+        .catch(err => {
+            console.error('Error fetching TV shows:', err);
+            return [];
+        });
+}
     
-            function searchContent(query) {
-                isSearchMode = true;
-                Promise.all([
-                    fetch(`https://api.themoviedb.org/3/search/movie?api_key=ea2f128742fd0a3bb3ae2e2baa64ed9e&query=${query}`),
-                    fetch(`https://api.themoviedb.org/3/search/tv?api_key=ea2f128742fd0a3bb3ae2e2baa64ed9e&query=${query}`)
-                ])
-                .then(responses => Promise.all(responses.map(res => res.json())))
-                .then(([movieData, tvData]) => {
-                    displaySearchResults(movieData.results, tvData.results);
-                })
-                .catch(err => console.error('Error searching content:', err));
-            }
+function searchContent(query) {
+    isSearchMode = true;
+    Promise.all([
+        fetchWithFallback('/search/movie', { query }),
+        fetchWithFallback('/search/tv', { query })
+    ])
+    .then(([movieData, tvData]) => {
+        displaySearchResults(movieData.results, tvData.results);
+    })
+    .catch(err => console.error('Error searching content:', err));
+}
     
             function createFeaturedSection(movies) {
                 featuredMovies = movies.slice(0, 5);
@@ -321,18 +343,17 @@
             }
     
             function fetchCastAndRecommendations(id, isMovie, modal) {
-                const type = isMovie ? 'movie' : 'tv';
-                Promise.all([
-                    fetch(`https://api.themoviedb.org/3/${type}/${id}/credits?api_key=ea2f128742fd0a3bb3ae2e2baa64ed9e`),
-                    fetch(`https://api.themoviedb.org/3/${type}/${id}/recommendations?api_key=ea2f128742fd0a3bb3ae2e2baa64ed9e`)
-                ])
-                .then(responses => Promise.all(responses.map(res => res.json())))
-                .then(([castData, recommendationsData]) => {
-                    displayCast(castData.cast.slice(0, 5), modal);
-                    displayRecommendations(recommendationsData.results.slice(0, 5), modal, isMovie);
-                })
-                .catch(err => console.error('Error fetching cast and recommendations:', err));
-            }
+    const type = isMovie ? 'movie' : 'tv';
+    Promise.all([
+        fetchWithFallback(`/${type}/${id}/credits`),
+        fetchWithFallback(`/${type}/${id}/recommendations`)
+    ])
+    .then(([castData, recommendationsData]) => {
+        displayCast(castData.cast.slice(0, 5), modal);
+        displayRecommendations(recommendationsData.results.slice(0, 5), modal, isMovie);
+    })
+    .catch(err => console.error('Error fetching cast and recommendations:', err));
+}
     
             function displayCast(cast, modal) {
                 const castList = modal.querySelector('.cast-list');
