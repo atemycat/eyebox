@@ -220,23 +220,26 @@ body.blur > *:not(.sidebar):not(.header) {
 }
 
 .pagination button {
-    background-color: #2575fc;
+    background-color: #ff0000;
     border: none;
     color: white;
     padding: 10px 20px;
     font-size: 1em;
     cursor: pointer;
     border-radius: 5px;
-    transition: background-color 0.3s;
+    transition: background-color 0.2s;
     margin: 0 5px;
 }
 
 .pagination button:hover {
-    background-color: #1a61d6;
+    background-color: #ffffff;
+    color: red;
 }
 
 .pagination span {
     font-size: 1.2em;
+    color: white;
+    font-family: 'Bungee', sans-serif;
 }
 
 /* Modal styles */
