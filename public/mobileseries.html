@@ -95,7 +95,7 @@
         </div>
         <h1 id="headerTitle" ><a class="eyebox" href="index.html">EYEBOX</a></h1>
         <div class="search-container">
-            <input type="text" id="search-input" placeholder="Search...">
+            <input type="text" id="search-input" placeholder="Search series...">
             <button id="search-button">Search</button>
         </div>
     </div>
@@ -318,20 +318,20 @@
             videoUrl = "API_URL_PLACEHOLDER";
         }else if (server === 4) {
             videoUrl = isMovie ? 
-                `https://vidsrc.rip/embed/movie/${id}` : 
-                `https://vidsrc.rip/embed/tv/${id}/${season}/${episode}`; // Assuming season 1, episode 1 for TV shows
+                `https://vidsrc.dev/embed/movie/${id}` : 
+                `https://vidsrc.dev/embed/tv/${id}`; // Assuming season 1, episode 1 for TV shows
         }else if (server === 5) {
             videoUrl = isMovie ? 
                 `https://embed.su/embed/movie/${id}` : 
-                `https://embed.su/embed/tv/${id}/${season}/${episode}`; // Assuming season 1, episode 1 for TV shows
+                `https://embed.su/embed/tv/${id}/1/1`; // Assuming season 1, episode 1 for TV shows
         }else if (server === 6) {
             videoUrl = isMovie ? 
                 `https://vidlink.pro/movie/${id}` : 
-                `https://vidlink.pro/tv/${id}/${season}/${episode}`; // Assuming season 1, episode 1 for TV shows
+                `https://vidlink.pro/tv/${id}/1/1`; // Assuming season 1, episode 1 for TV shows
         }else if (server === 7) {
             videoUrl = isMovie ? 
                 `https://vidsrc.xyz/embed/movie/${id}` : 
-                `https://vidsrc.xyz/embed/tv/${id}/${season}/${episode}`; // Assuming season 1, episode 1 for TV shows
+                `https://vidsrc.xyz/embed/tv/${id}`; // Assuming season 1, episode 1 for TV shows
         }else if (server === 8) {
             videoUrl = isMovie ? 
                 `https://moviee.tv/embed/movie/${id}` : 
@@ -339,19 +339,19 @@
         }else if (server === 9) {
             videoUrl = isMovie ? 
                 `https://vidsrc.cc/v2/embed/movie/${id}` : 
-                `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`; // Assuming season 1, episode 1 for TV shows
+                `https://vidsrc.cc/v2/embed/tv/${id}/1/1`; // Assuming season 1, episode 1 for TV shows
         }else if (server === 10) {
             videoUrl = isMovie ? 
                 `https://player.vidsrc.nl/embed/movie/${id}` : 
-                `https://player.vidsrc.nl/embed/tv/${id}/${season}/${episode}`; // Assuming season 1, episode 1 for TV shows
+                `https://player.vidsrc.nl/embed/tv/${id}/1/1`; // Assuming season 1, episode 1 for TV shows
         }else if (server === 11) {
             videoUrl = isMovie ? 
-                `https://vidsrc.dev/embed/movie/${id}` : 
-                `https://vidsrc.dev/embed/tv/${id}/${season}/${episode}`; // Assuming season 1, episode 1 for TV shows
+                `https://vidsrc.rip/embed/movie/${id}` :
+                `https://vidsrc.rip/embed/tv/${id}/1/1`; // Assuming season 1, episode 1 for TV shows
         }else if (server === 12) {
             videoUrl = isMovie ? 
                 `https://moviesapi.club/movie/${id}` : 
-                `https://moviesapi.club/tv/${id}/${season}/${episode}`; // Assuming season 1, episode 1 for TV shows
+                `https://moviesapi.club/tv/${id}-1-1`; // Assuming season 1, episode 1 for TV shows
         }else if (server === 13) {
             videoUrl = isMovie ? 
                 `https://player.vidsrc.nl/embed/movie/${id}` : 
@@ -369,7 +369,7 @@
                     <div class="server-list">
                         <button class="server-btn ${server === 1 ? 'active' : ''}" data-server="1">Server 1</button>
                         <button class="server-btn ${server === 2 ? 'active' : ''}" data-server="2">Server 2</button>
-                        <button class="server-btn ${server === 3 ? 'active' : ''}" data-server="3">Tamil Yogi</button>
+                        <button class="server-btn ${server === 3 ? 'active' : ''}" data-server="3">coming soon</button>
                         <button class="server-btn ${server === 4 ? 'active' : ''}" data-server="4">Server 4</button>
                         <button class="server-btn ${server === 5 ? 'active' : ''}" data-server="5">Server 5</button>
                         <button class="server-btn ${server === 6 ? 'active' : ''}" data-server="6">Server 6</button>
