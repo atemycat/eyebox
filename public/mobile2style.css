@@ -15,6 +15,54 @@ body.blur > *:not(.sidebar):not(.header) {
     filter: blur(5px);
 }
 
+.server-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.server-menu-btn {
+    padding: 10px;
+    background-color: #9e9e9e77;
+    border: none;
+    cursor: pointer;
+    border-radius: 30px;
+    color: rgb(255, 0, 0);
+}
+
+.server-list {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.server-list.show {
+    display: block;
+    background-color: #000000;
+}
+
+.server-btn {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    background-color: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+
+.server-btn:hover {
+    background-color: #f1f1f1;
+}
+
+.server-btn.active {
+    background-color: #ddd;
+}
+
 /* Header styles */
 .header {
     background-color: #000000;
