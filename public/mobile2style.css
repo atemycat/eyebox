@@ -33,6 +33,11 @@ body.blur > *:not(.sidebar):not(.header) {
     cursor: pointer;
 }
 
+.eyebox{
+    text-decoration: none;
+    color: red;
+}
+
 .header h1 {
     margin-left: 30px;
     font-size: 1.5em;
