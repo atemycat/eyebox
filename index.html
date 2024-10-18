@@ -569,12 +569,23 @@ function searchContent(query) {
                 }
             });
     
-            searchButton.addEventListener('click', () => {
-                const query = searchInput.value.trim();
-                if (query !== '') {
-                    searchContent(query);
-                }
-            });
+            // Function to handle search
+function handleSearch() {
+    const query = searchInput.value.trim();
+    if (query !== '') {
+        searchContent(query);
+    }
+}
+
+// Event listener for search button click
+searchButton.addEventListener('click', handleSearch);
+
+// Event listener for Enter key press in search input
+searchInput.addEventListener('keyup', (event) => {
+    if (event.key === 'Enter') {
+        handleSearch();
+    }
+});
     
             function updatePage() {
                 fetchContent(currentPage);
